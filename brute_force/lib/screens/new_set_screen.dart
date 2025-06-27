@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/run.dart';
+import '../services/storage_service.dart';
 
 class NewSetScreen extends StatefulWidget {
   const NewSetScreen({super.key});
@@ -10,11 +11,26 @@ class NewSetScreen extends StatefulWidget {
 
 class _NewSetScreenState extends State<NewSetScreen> {
   final TextEditingController _setNameController = TextEditingController();
+  late StorageService _storage;
+  List<Run> existingSets = [];
   int stringLength = 2;
   bool useNumbers = true;
   bool useSmallLetters = false;
   bool useBigLetters = false;
   bool useSpecialChars = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initStorage();
+  }
+
+  Future<void> _initStorage() async {
+    _storage = await StorageService.init();
+    setState(() {
+      existingSets = _storage.loadRuns();
+    });
+  }
 
   int get permutationsCount => Run.calculatePermutationsCount(
     length: stringLength,
@@ -23,6 +39,52 @@ class _NewSetScreenState extends State<NewSetScreen> {
     useBigLetters: useBigLetters,
     useSpecialChars: useSpecialChars,
   );
+
+  bool _isNameUnique(String name) {
+    return !existingSets.any((set) => 
+      set.name.toLowerCase() == name.toLowerCase()
+    );
+  }
+
+  void _showWarningDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Warning'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _createSet() {
+    final name = _setNameController.text.trim();
+    
+    if (name.isEmpty) {
+      _showWarningDialog('Please provide a name for the set.');
+      return;
+    }
+
+    if (!_isNameUnique(name)) {
+      _showWarningDialog('A set with this name already exists. Please choose a different name.');
+      return;
+    }
+
+    final newSet = Run.generate(
+      name: name,
+      stringLength: stringLength,
+      useNumbers: useNumbers,
+      useSmallLetters: useSmallLetters,
+      useBigLetters: useBigLetters,
+      useSpecialChars: useSpecialChars,
+    );
+    Navigator.pop(context, newSet);
+  }
 
   @override
   void dispose() {
@@ -47,7 +109,11 @@ class _NewSetScreenState extends State<NewSetScreen> {
                 labelText: 'Set Name',
                 hintText: 'Enter a name for this set',
                 border: OutlineInputBorder(),
+                helperText: 'Name is required and must be unique',
+                helperMaxLines: 2,
               ),
+              textCapitalization: TextCapitalization.words,
+              autofocus: true,
             ),
             const SizedBox(height: 24),
             const Text(
@@ -114,19 +180,7 @@ class _NewSetScreenState extends State<NewSetScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                if (_setNameController.text.isNotEmpty) {
-                  final newSet = Run.generate(
-                    name: _setNameController.text,
-                    stringLength: stringLength,
-                    useNumbers: useNumbers,
-                    useSmallLetters: useSmallLetters,
-                    useBigLetters: useBigLetters,
-                    useSpecialChars: useSpecialChars,
-                  );
-                  Navigator.pop(context, newSet);
-                }
-              },
+              onPressed: _createSet,
               child: const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text('Create Set'),
