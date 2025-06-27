@@ -1,4 +1,4 @@
-# Pure Vibe
+# BruteForcer
 
 A Flutter application that generates and manages permutations of character strings. The application works on both Android devices and web browsers.
 
@@ -39,7 +39,7 @@ A Flutter application that generates and manages permutations of character strin
 1. Clone the repository:
    ```bash
    git clone [repository-url]
-   cd pure_vibe
+   cd brute_force
    ```
 
 2. Install dependencies:

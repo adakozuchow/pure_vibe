@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pure Vibe'),
+        title: const Text('BruteForcer'),
         actions: [
           if (sets.isNotEmpty)
             PopupMenuButton<String>(
