@@ -29,7 +29,28 @@ class _SetsListScreenState extends State<SetsListScreen> {
   }
 
   Future<void> _saveState() async {
-    await _storage.saveRuns(sets);
+    try {
+      await _storage.saveRuns(sets);
+    } catch (e) {
+      if (!mounted) return;
+      
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Storage Error'),
+          content: Text(
+            'Failed to save changes: ${e.toString()}\n\n'
+            'Try deleting some existing sets to free up space.'
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _createNewSet() async {
@@ -39,10 +60,18 @@ class _SetsListScreenState extends State<SetsListScreen> {
     );
 
     if (result != null) {
-      setState(() {
-        sets.add(result);
-        _saveState();
-      });
+      try {
+        setState(() {
+          sets.add(result);
+        });
+        await _saveState();
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          // Revert the addition if save failed
+          sets.removeLast();
+        });
+      }
     }
   }
 

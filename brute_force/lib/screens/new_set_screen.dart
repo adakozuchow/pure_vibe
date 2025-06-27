@@ -62,7 +62,35 @@ class _NewSetScreenState extends State<NewSetScreen> {
     );
   }
 
-  void _createSet() {
+  Future<bool> _showConfirmationDialog(String message) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmation Required'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Color _getPermutationCountColor() {
+    if (permutationsCount > 2000) {
+      return Colors.red;
+    }
+    return Colors.green.shade800;
+  }
+
+  Future<void> _createSet() async {
     final name = _setNameController.text.trim();
     
     if (name.isEmpty) {
@@ -75,6 +103,7 @@ class _NewSetScreenState extends State<NewSetScreen> {
       return;
     }
 
+    // Create the set first to check storage requirements
     final newSet = Run.generate(
       name: name,
       stringLength: stringLength,
@@ -83,6 +112,37 @@ class _NewSetScreenState extends State<NewSetScreen> {
       useBigLetters: useBigLetters,
       useSpecialChars: useSpecialChars,
     );
+
+    // Check storage space before showing other warnings
+    final hasSpace = await _storage.hasEnoughSpaceForRun(newSet);
+    if (!hasSpace) {
+      _showWarningDialog(
+        'Cannot create this set: Storage quota exceeded.\n\n'
+        'The set is too large to store. Try reducing the string length '
+        'or using fewer character types.\n\n'
+        'You can also delete some existing sets to free up space.'
+      );
+      return;
+    }
+
+    if (permutationsCount > 100000) {
+      _showWarningDialog(
+        'Warning: Generating more than 100,000 permutations may impact application performance and stability.'
+      );
+    }
+
+    if (permutationsCount > 9999) {
+      final confirmed = await _showConfirmationDialog(
+        'You are about to generate ${permutationsCount.toString()} permutations. '
+        'This is a large number that may affect application performance and storage space. '
+        'Are you sure you want to continue?'
+      );
+      
+      if (!confirmed) {
+        return;
+      }
+    }
+
     Navigator.pop(context, newSet);
   }
 
@@ -175,7 +235,10 @@ class _NewSetScreenState extends State<NewSetScreen> {
             const SizedBox(height: 24),
             Text(
               'This will generate $permutationsCount permutations',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: _getPermutationCountColor(),
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
