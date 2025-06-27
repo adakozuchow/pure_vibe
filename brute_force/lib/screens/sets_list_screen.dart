@@ -92,6 +92,15 @@ class _SetsListScreenState extends State<SetsListScreen> {
     );
   }
 
+  String _getCharacterSetDescription(Run set) {
+    final options = <String>[];
+    if (set.useNumbers) options.add('0-9');
+    if (set.useSmallLetters) options.add('a-z');
+    if (set.useBigLetters) options.add('A-Z');
+    if (set.useSpecialChars) options.add('!@#');
+    return options.join(', ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,9 +139,24 @@ class _SetsListScreenState extends State<SetsListScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  subtitle: Text(
-                    'Remaining: ${set.remainingTiles} / ${set.tiles.length}',
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text(
+                        'Progress: ${set.remainingTiles} / ${set.tiles.length} remaining',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Length: ${set.stringLength} chars • ${_getCharacterSetDescription(set)}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                    ],
                   ),
+                  isThreeLine: true,
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     onPressed: () => _deleteSet(set.id),
