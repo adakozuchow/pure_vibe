@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/run.dart';
 import '../models/character_tile.dart';
 import '../widgets/character_grid.dart';
+import '../widgets/suggested_tile.dart';
 import '../services/storage_service.dart';
 import 'new_set_screen.dart';
 
@@ -152,6 +153,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   'Remaining: ${currentSet!.remainingTiles}',
                   style: Theme.of(context).textTheme.titleLarge,
                   textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                SuggestedTile(
+                  tiles: currentSet!.tiles,
+                  onTileTap: _onTileTap,
                 ),
                 const SizedBox(height: 16),
                 Expanded(
