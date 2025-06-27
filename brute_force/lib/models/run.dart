@@ -9,6 +9,7 @@ class Run {
   final bool useNumbers;
   final bool useSmallLetters;
   final bool useBigLetters;
+  final bool useSpecialChars;
 
   Run({
     required this.id,
@@ -17,6 +18,7 @@ class Run {
     required this.useNumbers,
     required this.useSmallLetters,
     required this.useBigLetters,
+    required this.useSpecialChars,
     List<CharacterTile>? tiles,
   }) : tiles = tiles ?? [];
 
@@ -24,12 +26,14 @@ class Run {
     required bool useNumbers,
     required bool useSmallLetters,
     required bool useBigLetters,
+    required bool useSpecialChars,
   }) {
     final charSet = <String>[];
     
     if (useNumbers) charSet.addAll(['0','1','2','3','4','5','6','7','8','9']);
     if (useSmallLetters) charSet.addAll('abcdefghijklmnopqrstuvwxyz'.split(''));
     if (useBigLetters) charSet.addAll('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''));
+    if (useSpecialChars) charSet.addAll('!@#\$%^&*()_+-=[]{}|;:,.<>?'.split(''));
 
     if (charSet.isEmpty) {
       throw ArgumentError('At least one character set must be selected');
@@ -62,11 +66,13 @@ class Run {
     required bool useNumbers,
     required bool useSmallLetters,
     required bool useBigLetters,
+    required bool useSpecialChars,
   }) {
     int charSetSize = 0;
     if (useNumbers) charSetSize += 10;
     if (useSmallLetters) charSetSize += 26;
     if (useBigLetters) charSetSize += 26;
+    if (useSpecialChars) charSetSize += 23; // Number of special characters
     
     if (charSetSize == 0) return 0;
     return pow(charSetSize, length).toInt();
@@ -78,11 +84,13 @@ class Run {
     required bool useNumbers,
     required bool useSmallLetters,
     required bool useBigLetters,
+    required bool useSpecialChars,
   }) {
     final charSet = _generateCharacterSet(
       useNumbers: useNumbers,
       useSmallLetters: useSmallLetters,
       useBigLetters: useBigLetters,
+      useSpecialChars: useSpecialChars,
     );
 
     final permutations = generatePermutations(
@@ -97,6 +105,7 @@ class Run {
       useNumbers: useNumbers,
       useSmallLetters: useSmallLetters,
       useBigLetters: useBigLetters,
+      useSpecialChars: useSpecialChars,
       tiles: List.generate(
         permutations.length,
         (index) => CharacterTile(
@@ -114,6 +123,7 @@ class Run {
     'useNumbers': useNumbers,
     'useSmallLetters': useSmallLetters,
     'useBigLetters': useBigLetters,
+    'useSpecialChars': useSpecialChars,
     'tiles': tiles.map((tile) => {
       'character': tile.character,
       'position': tile.position,
@@ -129,6 +139,7 @@ class Run {
       useNumbers: json['useNumbers'],
       useSmallLetters: json['useSmallLetters'],
       useBigLetters: json['useBigLetters'],
+      useSpecialChars: json['useSpecialChars'] ?? false, // Default for backward compatibility
       tiles: (json['tiles'] as List).map((tile) => CharacterTile(
         character: tile['character'],
         position: tile['position'],

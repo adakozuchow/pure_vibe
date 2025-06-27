@@ -19,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool useNumbers = true;
   bool useSmallLetters = false;
   bool useBigLetters = false;
+  bool useSpecialChars = false;
   final TextEditingController _runNameController = TextEditingController();
 
   @override
@@ -62,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 useNumbers: useNumbers,
                 useSmallLetters: useSmallLetters,
                 useBigLetters: useBigLetters,
+                useSpecialChars: useSpecialChars,
               )} permutations',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -82,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     useNumbers: useNumbers,
                     useSmallLetters: useSmallLetters,
                     useBigLetters: useBigLetters,
+                    useSpecialChars: useSpecialChars,
                   );
                   runs.add(newRun);
                   currentRunId = newRun.id;
@@ -114,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
     useNumbers: useNumbers,
     useSmallLetters: useSmallLetters,
     useBigLetters: useBigLetters,
+    useSpecialChars: useSpecialChars,
   );
 
   void _deleteRun(String runId) {
@@ -222,8 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Slider(
                             value: stringLength.toDouble(),
                             min: 1,
-                            max: 5,
-                            divisions: 4,
+                            max: 10,
+                            divisions: 9,
                             label: stringLength.toString(),
                             onChanged: (value) {
                               setState(() {
@@ -254,6 +258,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: useBigLetters,
                       onChanged: (value) {
                         setState(() => useBigLetters = value ?? false);
+                      },
+                    ),
+                    CheckboxListTile(
+                      title: const Text('Special Characters (!@#\$%^&*...)'),
+                      value: useSpecialChars,
+                      onChanged: (value) {
+                        setState(() => useSpecialChars = value ?? false);
                       },
                     ),
                     const SizedBox(height: 16),
