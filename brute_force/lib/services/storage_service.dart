@@ -3,45 +3,40 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/run.dart';
 
 class StorageService {
-  static const String _runsKey = 'runs';
-  static const String _currentRunIdKey = 'current_run_id';
+  static const String _setsKey = 'sets';
+  static const String _currentSetIdKey = 'current_set_id';
 
   final SharedPreferences _prefs;
 
-  StorageService(this._prefs);
+  StorageService._(this._prefs);
 
   static Future<StorageService> init() async {
     final prefs = await SharedPreferences.getInstance();
-    return StorageService(prefs);
-  }
-
-  Future<void> saveRuns(List<Run> runs) async {
-    final runsJson = runs.map((run) => run.toJson()).toList();
-    await _prefs.setString(_runsKey, jsonEncode(runsJson));
-  }
-
-  Future<void> saveCurrentRunId(String? runId) async {
-    if (runId != null) {
-      await _prefs.setString(_currentRunIdKey, runId);
-    } else {
-      await _prefs.remove(_currentRunIdKey);
-    }
+    return StorageService._(prefs);
   }
 
   List<Run> loadRuns() {
-    final runsString = _prefs.getString(_runsKey);
-    if (runsString == null) return [];
+    final String? setsJson = _prefs.getString(_setsKey);
+    if (setsJson == null) return [];
 
-    try {
-      final runsJson = jsonDecode(runsString) as List;
-      return runsJson.map((json) => Run.fromJson(json as Map<String, dynamic>)).toList();
-    } catch (e) {
-      print('Error loading runs: $e');
-      return [];
-    }
+    final List<dynamic> setsList = jsonDecode(setsJson);
+    return setsList.map((json) => Run.fromJson(json)).toList();
+  }
+
+  Future<void> saveRuns(List<Run> sets) async {
+    final String setsJson = jsonEncode(sets.map((set) => set.toJson()).toList());
+    await _prefs.setString(_setsKey, setsJson);
   }
 
   String? loadCurrentRunId() {
-    return _prefs.getString(_currentRunIdKey);
+    return _prefs.getString(_currentSetIdKey);
+  }
+
+  Future<void> saveCurrentRunId(String? setId) async {
+    if (setId != null) {
+      await _prefs.setString(_currentSetIdKey, setId);
+    } else {
+      await _prefs.remove(_currentSetIdKey);
+    }
   }
 } 
