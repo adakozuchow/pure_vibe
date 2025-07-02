@@ -27,11 +27,19 @@ class _HomeScreenState extends State<HomeScreen> {
     currentSet = widget.initialSet;
   }
 
-  void _onTileTap(CharacterTile tile) {
-    setState(() {
-      tile.markAsUsed();
-      widget.onSetUpdated(currentSet);
-    });
+  void _onTileTap(CharacterTile tile) async {
+    final isGuessed = await showGuessDialog(context);
+    
+    if (isGuessed != null) {
+      setState(() {
+        if (isGuessed) {
+          tile.markAsGuessed();
+        } else {
+          tile.markAsUsed();
+        }
+        widget.onSetUpdated(currentSet);
+      });
+    }
   }
 
   @override
@@ -69,9 +77,37 @@ class _HomeScreenState extends State<HomeScreen> {
               onTileTap: _onTileTap,
             ),
             const SizedBox(height: 16),
-            Expanded(
+            if (currentSet.guessedTiles.isNotEmpty) ...[
+              const Text(
+                'Guessed Combinations:',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Flexible(
+                flex: 1,
+                child: CharacterGrid(
+                  tiles: currentSet.guessedTiles,
+                  onTileTap: (_) {}, // No-op for guessed tiles
+                  isGuessedGrid: true,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            const Text(
+              'Available Combinations:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              flex: 2,
               child: CharacterGrid(
-                tiles: currentSet.tiles,
+                tiles: currentSet.activeTiles,
                 onTileTap: _onTileTap,
               ),
             ),

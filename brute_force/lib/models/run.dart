@@ -128,6 +128,7 @@ class Run {
       'character': tile.character,
       'position': tile.position,
       'isUsed': tile.isUsed,
+      'isGuessed': tile.isGuessed,
     }).toList(),
   };
 
@@ -139,15 +140,18 @@ class Run {
       useNumbers: json['useNumbers'],
       useSmallLetters: json['useSmallLetters'],
       useBigLetters: json['useBigLetters'],
-      useSpecialChars: json['useSpecialChars'] ?? false, // Default for backward compatibility
+      useSpecialChars: json['useSpecialChars'] ?? false,
       tiles: (json['tiles'] as List).map((tile) => CharacterTile(
         character: tile['character'],
         position: tile['position'],
         isUsed: tile['isUsed'],
+        isGuessed: tile['isGuessed'] ?? false,
       )).toList(),
     );
   }
 
   int get remainingTiles => tiles.where((tile) => !tile.isUsed).length;
   bool get isCompleted => remainingTiles == 0;
+  List<CharacterTile> get guessedTiles => tiles.where((tile) => tile.isGuessed).toList();
+  List<CharacterTile> get activeTiles => tiles.where((tile) => !tile.isUsed).toList();
 } 

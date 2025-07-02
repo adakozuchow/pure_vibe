@@ -54,7 +54,7 @@ class _SuggestedTileState extends State<SuggestedTile> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Suggested String',
+              'Guess of the moment',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
